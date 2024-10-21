@@ -34,6 +34,12 @@
         #high-score {
             color: #61dafb;
         }
+        #start-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -43,14 +49,16 @@
             <span>Score: <span id="score">0</span></span>
             <span>High Score: <span id="high-score">0</span></span>
         </div>
+        <button id="start-button">Start Game</button>
     </div>
-    <audio id="background-music" src="/background-music.mp3" loop></audio>
+    <audio id="background-music" src="path/to/your/music/file.mp3" loop></audio>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
         const music = document.getElementById('background-music');
+        const startButton = document.getElementById('start-button');
 
         let snake = [{x: 200, y: 200}, {x: 190, y: 200}, {x: 180, y: 200}];
         let direction = {x: 10, y: 0};
@@ -197,8 +205,11 @@
             document.location.reload();
         }
 
-        // Start the game
-        initGame();
+        // Start the game on button click
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';  // Hide the start button
+            initGame();
+        });
     </script>
 </body>
 </html>
