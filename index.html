@@ -42,16 +42,15 @@
         <div id="game-stats">
             <span>Score: <span id="score">0</span></span>
             <span>High Score: <span id="high-score">0</span></span>
-            
         </div>
     </div>
-
+    <audio id="background-music" src="path/to/your/music/file.mp3" loop></audio>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
-        
+        const music = document.getElementById('background-music');
 
         let snake = [{x: 200, y: 200}, {x: 190, y: 200}, {x: 180, y: 200}];
         let direction = {x: 10, y: 0};
@@ -67,6 +66,7 @@
             highScoreElement.textContent = highScore;
             placeFood();
             gameInterval = setInterval(main, speed);
+            music.play();  // Play the music
         }
 
         // Game's main loop
@@ -80,19 +80,22 @@
                 checkEatFood();
             }
         }
-		// Pause and resume functionality
-		document.addEventListener('keydown', (event) => {
-		if (event.code === 'Space') {
-			togglePause();
-		}
-		});
 
-	
+        // Pause and resume functionality
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                togglePause();
+            }
+        });
 
-	function togglePause() {
-    isPaused = !isPaused;
-    
-}
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                music.pause();  // Pause the music
+            } else {
+                music.play();  // Resume the music
+            }
+        }
 
         // Clear the canvas
         function clearCanvas() {
@@ -109,20 +112,30 @@
         }
 
         // Move the snake based on the current direction
+        let changingDirection = false;
+        document.addEventListener('keydown', changeDirection);
+        function changeDirection(event) {
+            if (changingDirection) return;
+            changingDirection = true;
+
+            const key = event.keyCode;
+            const goingUp = direction.y === -10;
+            const goingDown = direction.y === 10;
+            const goingRight = direction.x === 10;
+            const goingLeft = direction.x === -10;
+
+            if (key === 37 && !goingRight) direction = {x: -10, y: 0}; // Left
+            if (key === 38 && !goingDown) direction = {x: 0, y: -10}; // Up
+            if (key === 39 && !goingLeft) direction = {x: 10, y: 0};  // Right
+            if (key === 40 && !goingUp) direction = {x: 0, y: 10};  // Down
+        }
+
+        // Reset changingDirection flag after moving the snake
         function moveSnake() {
             const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
             snake.unshift(head);  // Add new head
             snake.pop();  // Remove the tail
-        }
-
-        // Change the direction based on user input
-        document.addEventListener('keydown', changeDirection);
-        function changeDirection(event) {
-            const key = event.keyCode;
-            if (key === 37 && direction.x === 0) direction = {x: -10, y: 0}; // Left
-            if (key === 38 && direction.y === 0) direction = {x: 0, y: -10}; // Up
-            if (key === 39 && direction.x === 0) direction = {x: 10, y: 0};  // Right
-            if (key === 40 && direction.y === 0) direction = {x: 0, y: 10};  // Down
+            changingDirection = false;
         }
 
         // Draw the food
@@ -174,6 +187,8 @@
         // End game and reset
         function endGame() {
             clearInterval(gameInterval);
+            music.pause();  // Stop the music
+            music.currentTime = 0;  // Reset music to the start
             if (score > highScore) {
                 localStorage.setItem('snakeHighScore', score);
                 highScoreElement.textContent = score;
@@ -182,45 +197,8 @@
             document.location.reload();
         }
 
-        // Pause and resume functionality
-        
-
         // Start the game
         initGame();
-	const music = document.getElementById('background-music');
-
-// Start the game music when the game begins
-function initGame() {
-    highScoreElement.textContent = highScore;
-    placeFood();
-    gameInterval = setInterval(main, speed);
-    music.play();  // Play the music
-}
-
-// Pause or resume the game along with the music
-function togglePause() {
-    isPaused = !isPaused;
-    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
-    if (isPaused) {
-        music.pause();  // Pause the music
-    } else {
-        music.play();  // Resume the music
-    }
-}
-
-// Stop the music when the game ends
-function endGame() {
-    clearInterval(gameInterval);
-    music.pause();  // Stop the music
-    music.currentTime = 0;  // Reset music to the start
-    if (score > highScore) {
-        localStorage.setItem('snakeHighScore', score);
-        highScoreElement.textContent = score;
-    }
-    alert('Game over! Press OK to restart.');
-    document.location.reload();
-}
-
     </script>
 </body>
 </html>
