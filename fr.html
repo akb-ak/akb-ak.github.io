@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Snake Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid #61dafb;
+            background-color: black;
+        }
+        #game-stats {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #game-stats span {
+            font-size: 18px;
+            margin-right: 20px;
+        }
+        #high-score {
+            color: #61dafb;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>High Score: <span id="high-score">0</span></span>
+            
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('high-score');
+        
+
+        let snake = [{x: 200, y: 200}, {x: 190, y: 200}, {x: 180, y: 200}];
+        let direction = {x: 10, y: 0};
+        let food = {x: 0, y: 0};
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+        let speed = 100;
+        let gameInterval;
+        let isPaused = false;
+
+        // Initialize the game
+        function initGame() {
+            highScoreElement.textContent = highScore;
+            placeFood();
+            gameInterval = setInterval(main, speed);
+        }
+
+        // Game's main loop
+        function main() {
+            if (!isPaused) {
+                if (checkCollision()) return endGame();
+                moveSnake();
+                clearCanvas();
+                drawFood();
+                drawSnake();
+                checkEatFood();
+            }
+        }
+		// Pause and resume functionality
+		document.addEventListener('keydown', (event) => {
+		if (event.code === 'Space') {
+			togglePause();
+		}
+		});
+
+	
+
+	function togglePause() {
+    isPaused = !isPaused;
+    
+}
+
+        // Clear the canvas
+        function clearCanvas() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Draw the snake on the canvas
+        function drawSnake() {
+            snake.forEach(part => {
+                ctx.fillStyle = '#61dafb';
+                ctx.fillRect(part.x, part.y, 10, 10);
+            });
+        }
+
+        // Move the snake based on the current direction
+        function moveSnake() {
+            const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+            snake.unshift(head);  // Add new head
+            snake.pop();  // Remove the tail
+        }
+
+        // Change the direction based on user input
+        document.addEventListener('keydown', changeDirection);
+        function changeDirection(event) {
+            const key = event.keyCode;
+            if (key === 37 && direction.x === 0) direction = {x: -10, y: 0}; // Left
+            if (key === 38 && direction.y === 0) direction = {x: 0, y: -10}; // Up
+            if (key === 39 && direction.x === 0) direction = {x: 10, y: 0};  // Right
+            if (key === 40 && direction.y === 0) direction = {x: 0, y: 10};  // Down
+        }
+
+        // Draw the food
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, 10, 10);
+        }
+
+        // Place food randomly on the canvas
+        function placeFood() {
+            food.x = Math.floor(Math.random() * (canvas.width / 10)) * 10;
+            food.y = Math.floor(Math.random() * (canvas.height / 10)) * 10;
+        }
+
+        // Check if snake eats the food
+        function checkEatFood() {
+            if (snake[0].x === food.x && snake[0].y === food.y) {
+                snake.push({...snake[snake.length - 1]});  // Add length to snake
+                score += 10;
+                scoreElement.textContent = score;
+                placeFood();
+                speedUp();
+            }
+        }
+
+        // Increase speed as the snake grows
+        function speedUp() {
+            if (speed > 30) {
+                clearInterval(gameInterval);
+                speed -= 5;
+                gameInterval = setInterval(main, speed);
+            }
+        }
+
+        // Check collision with walls or itself
+        function checkCollision() {
+            const head = snake[0];
+            for (let i = 4; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) return true;
+            }
+            // Wrap around the screen
+            if (head.x < 0) head.x = canvas.width - 10;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = canvas.height - 10;
+            if (head.y >= canvas.height) head.y = 0;
+            return false;
+        }
+
+        // End game and reset
+        function endGame() {
+            clearInterval(gameInterval);
+            if (score > highScore) {
+                localStorage.setItem('snakeHighScore', score);
+                highScoreElement.textContent = score;
+            }
+            alert('Game over! Press OK to restart.');
+            document.location.reload();
+        }
+
+        // Pause and resume functionality
+        
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
