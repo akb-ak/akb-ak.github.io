@@ -187,6 +187,40 @@
 
         // Start the game
         initGame();
+	const music = document.getElementById('background-music');
+
+// Start the game music when the game begins
+function initGame() {
+    highScoreElement.textContent = highScore;
+    placeFood();
+    gameInterval = setInterval(main, speed);
+    music.play();  // Play the music
+}
+
+// Pause or resume the game along with the music
+function togglePause() {
+    isPaused = !isPaused;
+    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+    if (isPaused) {
+        music.pause();  // Pause the music
+    } else {
+        music.play();  // Resume the music
+    }
+}
+
+// Stop the music when the game ends
+function endGame() {
+    clearInterval(gameInterval);
+    music.pause();  // Stop the music
+    music.currentTime = 0;  // Reset music to the start
+    if (score > highScore) {
+        localStorage.setItem('snakeHighScore', score);
+        highScoreElement.textContent = score;
+    }
+    alert('Game over! Press OK to restart.');
+    document.location.reload();
+}
+
     </script>
 </body>
 </html>
