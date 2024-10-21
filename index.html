@@ -51,7 +51,16 @@
         </div>
         <button id="start-button">Start Game</button>
     </div>
-    <audio id="background-music" src="background-music.mp3" loop></audio>
+   const music = document.getElementById('background-music');
+    fetch('background-music.mp3')
+      .then(response => response.blob())
+      .then(blob => {
+          const url = URL.createObjectURL(blob);
+          music.src = url;
+          music.play();
+      })
+      .catch(error => console.error('Error fetching audio:', error));
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
