@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Addictive Game</title>
+    <title>Falling Dodge</title>
     <style>
         body, html {
             margin: 0;
@@ -73,13 +73,22 @@
         }
 
         function createObstacle() {
-            const obstacleWidth = Math.random() * (canvas.width - 50) + 10; // Smaller blocks
+            const obstacleWidth = Math.random() * (canvas.width / 2 - 20) + 40; // Make smaller blocks, ensure some room
             const obstacleX = Math.random() * (canvas.width - obstacleWidth);
+            
+            // Ensure a minimum gap between obstacles (no obstacle too close to previous)
+            if (obstacles.length > 0) {
+                let lastObstacle = obstacles[obstacles.length - 1];
+                if (Math.abs(lastObstacle.x - obstacleX) < player.width * 2) {
+                    obstacleX = Math.max(obstacleX + player.width * 2, canvas.width - obstacleWidth);
+                }
+            }
+            
             obstacles.push({
                 x: obstacleX,
                 y: -20,
                 width: obstacleWidth,
-                height: 10, // Smaller height as well
+                height: 20,
                 color: '#FF5722'
             });
         }
@@ -166,7 +175,7 @@
             drawObstacles();
             updatePlayerPosition();
 
-            if (Math.random() < 0.02) createObstacle();
+            if (Math.random() < 0.015) createObstacle(); // Lower frequency of obstacles
 
             requestAnimationFrame(gameLoop);
         }
