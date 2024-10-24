@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addictive Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+        }
+
+        #gameCanvas {
+            background-color: #282c34;
+            display: block;
+            margin: 0 auto;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border: 5px solid #444;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #score, #highScore {
+            position: absolute;
+            color: white;
+            font-size: 18px;
+            top: 10px;
+            left: 10px;
+        }
+
+        #highScore {
+            right: 10px;
+            left: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">Score: 0</div>
+    <div id="highScore">High Score: 0</div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 600;
+
+        let player = {
+            x: canvas.width / 2 - 20,
+            y: canvas.height - 40,
+            width: 40,
+            height: 40,
+            speed: 6,
+            dx: 0
+        };
+
+        let obstacles = [];
+        let obstacleSpeed = 3;
+        let score = 0;
+        let highScore = localStorage.getItem('highScore') || 0;
+
+        document.getElementById('highScore').innerText = `High Score: ${highScore}`;
+
+        function drawPlayer() {
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function createObstacle() {
+            const obstacleWidth = Math.random() * (canvas.width - 40) + 20;
+            const obstacleX = Math.random() * (canvas.width - obstacleWidth);
+            obstacles.push({
+                x: obstacleX,
+                y: -20,
+                width: obstacleWidth,
+                height: 20,
+                color: '#FF5722'
+            });
+        }
+
+        function drawObstacles() {
+            obstacles.forEach((obstacle, index) => {
+                ctx.fillStyle = obstacle.color;
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                obstacle.y += obstacleSpeed;
+
+                // Remove off-screen obstacles
+                if (obstacle.y > canvas.height) {
+                    obstacles.splice(index, 1);
+                    score++;
+                    document.getElementById('score').innerText = `Score: ${score}`;
+                    if (score % 10 === 0) {
+                        obstacleSpeed += 0.5; // Increase difficulty
+                    }
+                }
+
+                // Check collision with player
+                if (obstacle.y + obstacle.height > player.y &&
+                    obstacle.y < player.y + player.height &&
+                    obstacle.x < player.x + player.width &&
+                    obstacle.x + obstacle.width > player.x) {
+                    gameOver();
+                }
+            });
+        }
+
+        function updatePlayerPosition() {
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        }
+
+        function gameOver() {
+            alert(`Game Over! Your Score: ${score}`);
+            if (score > highScore) {
+                localStorage.setItem('highScore', score);
+                highScore = score;
+                document.getElementById('highScore').innerText = `High Score: ${highScore}`;
+            }
+            resetGame();
+        }
+
+        function resetGame() {
+            player.x = canvas.width / 2 - 20;
+            obstacles = [];
+            obstacleSpeed = 3;
+            score = 0;
+            document.getElementById('score').innerText = `Score: 0`;
+        }
+
+        function moveRight() {
+            player.dx = player.speed;
+        }
+
+        function moveLeft() {
+            player.dx = -player.speed;
+        }
+
+        function stopPlayer() {
+            player.dx = 0;
+        }
+
+        function handleInput(e) {
+            if (e.key === 'ArrowRight' || e.key === 'd') {
+                moveRight();
+            } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+                moveLeft();
+            }
+        }
+
+        function stopInput(e) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'd') {
+                stopPlayer();
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawObstacles();
+            updatePlayerPosition();
+
+            if (Math.random() < 0.02) createObstacle();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', handleInput);
+        document.addEventListener('keyup', stopInput);
+
+        gameLoop();
+    </script>
+</body>
+</html>
