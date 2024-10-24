@@ -33,11 +33,11 @@
             margin-bottom: 30px;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
-        #snakeLink {
+        #snakeLink, #dodgeLink {
             font-size: 4rem;
             margin-bottom: 20px;
         }
-        #playButton {
+        #playButton, #dodgeButton {
             padding: 15px 30px;
             font-size: 1.5rem;
             color: #61dafb;
@@ -47,7 +47,7 @@
             cursor: pointer;
             transition: background-color 0.3s, transform 0.3s;
         }
-        #playButton:hover {
+        #playButton:hover, #dodgeButton:hover {
             background-color: #61dafb;
             color: #282c34;
             transform: scale(1.05);
@@ -61,7 +61,14 @@
 <body>
     <h1>Welcome to My Projects!</h1>
     <p>Check out my awesome creations!</p>
+
+    <!-- Snake Game Link -->
     <div id="snakeLink">🐍</div>
     <button id="playButton" onclick="window.location.href='snake.html'">Play Snake Game</button>
+
+    <!-- Dodge Game Link -->
+    <div id="dodgeLink">🚀</div>
+    <button id="dodgeButton" onclick="window.location.href='/dodge'">Play Dodge Game</button>
+
 </body>
 </html>
