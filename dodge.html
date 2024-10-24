@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Dodge</title>
+    <title>Dodge Game</title>
     <style>
         body, html {
             margin: 0;
@@ -26,24 +26,18 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
-        #score, #highScore {
+        #score {
             position: absolute;
             color: white;
             font-size: 18px;
             top: 10px;
             left: 10px;
         }
-
-        #highScore {
-            right: 10px;
-            left: auto;
-        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="score">Score: 0</div>
-    <div id="highScore">High Score: 0</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -61,11 +55,9 @@
         };
 
         let obstacles = [];
-        let obstacleSpeed = 3;
+        let obstacleSpeed = 2;
         let score = 0;
-        let highScore = localStorage.getItem('highScore') || 0;
-
-        document.getElementById('highScore').innerText = `High Score: ${highScore}`;
+        let gameOverFlag = false;
 
         function drawPlayer() {
             ctx.fillStyle = '#4CAF50';
@@ -73,17 +65,8 @@
         }
 
         function createObstacle() {
-            const obstacleWidth = Math.random() * (canvas.width / 2 - 20) + 40; // Make smaller blocks, ensure some room
+            const obstacleWidth = Math.random() * (canvas.width / 3) + 30; // Random width for variation
             const obstacleX = Math.random() * (canvas.width - obstacleWidth);
-            
-            // Ensure a minimum gap between obstacles (no obstacle too close to previous)
-            if (obstacles.length > 0) {
-                let lastObstacle = obstacles[obstacles.length - 1];
-                if (Math.abs(lastObstacle.x - obstacleX) < player.width * 2) {
-                    obstacleX = Math.max(obstacleX + player.width * 2, canvas.width - obstacleWidth);
-                }
-            }
-            
             obstacles.push({
                 x: obstacleX,
                 y: -20,
@@ -99,22 +82,21 @@
                 ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                 obstacle.y += obstacleSpeed;
 
-                // Remove off-screen obstacles
+                // Remove off-screen obstacles and update score
                 if (obstacle.y > canvas.height) {
                     obstacles.splice(index, 1);
                     score++;
                     document.getElementById('score').innerText = `Score: ${score}`;
-                    if (score % 10 === 0) {
-                        obstacleSpeed += 0.5; // Increase difficulty gradually
-                    }
                 }
 
                 // Check collision with player
-                if (obstacle.y + obstacle.height > player.y &&
+                if (
+                    obstacle.y + obstacle.height > player.y &&
                     obstacle.y < player.y + player.height &&
                     obstacle.x < player.x + player.width &&
-                    obstacle.x + obstacle.width > player.x) {
-                    gameOver();
+                    obstacle.x + obstacle.width > player.x
+                ) {
+                    endGame();
                 }
             });
         }
@@ -125,21 +107,18 @@
             if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
         }
 
-        function gameOver() {
+        function endGame() {
+            gameOverFlag = true;
             alert(`Game Over! Your Score: ${score}`);
-            if (score > highScore) {
-                localStorage.setItem('highScore', score);
-                highScore = score;
-                document.getElementById('highScore').innerText = `High Score: ${highScore}`;
-            }
             resetGame();
         }
 
         function resetGame() {
             player.x = canvas.width / 2 - 20;
             obstacles = [];
-            obstacleSpeed = 3;
             score = 0;
+            obstacleSpeed = 2;
+            gameOverFlag = false;
             document.getElementById('score').innerText = `Score: 0`;
         }
 
@@ -170,12 +149,18 @@
         }
 
         function gameLoop() {
+            if (gameOverFlag) return;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawPlayer();
             drawObstacles();
             updatePlayerPosition();
 
-            if (Math.random() < 0.015) createObstacle(); // Lower frequency of obstacles
+            // Create obstacles at random intervals
+            if (Math.random() < 0.02) createObstacle();
+
+            // Gradually increase obstacle speed for difficulty
+            obstacleSpeed += 0.001;
 
             requestAnimationFrame(gameLoop);
         }
