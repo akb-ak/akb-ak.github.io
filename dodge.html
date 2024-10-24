@@ -14,7 +14,7 @@
         }
 
         #gameCanvas {
-            background-color: #282c34;
+            background-color: #f0f0f0;
             display: block;
             margin: 0 auto;
             position: absolute;
@@ -73,13 +73,13 @@
         }
 
         function createObstacle() {
-            const obstacleWidth = Math.random() * (canvas.width - 40) + 20;
+            const obstacleWidth = Math.random() * (canvas.width - 50) + 10; // Smaller blocks
             const obstacleX = Math.random() * (canvas.width - obstacleWidth);
             obstacles.push({
                 x: obstacleX,
                 y: -20,
                 width: obstacleWidth,
-                height: 20,
+                height: 10, // Smaller height as well
                 color: '#FF5722'
             });
         }
@@ -96,7 +96,7 @@
                     score++;
                     document.getElementById('score').innerText = `Score: ${score}`;
                     if (score % 10 === 0) {
-                        obstacleSpeed += 0.5; // Increase difficulty
+                        obstacleSpeed += 0.5; // Increase difficulty gradually
                     }
                 }
 
